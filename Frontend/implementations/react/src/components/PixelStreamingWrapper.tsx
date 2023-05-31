@@ -82,8 +82,8 @@ export const PixelStreamingWrapper = ({
         }} onClick={postEvent} >
             Post My Params
         </div>
-    )
-    
+    );
+
     return (
         <div
             style={{
