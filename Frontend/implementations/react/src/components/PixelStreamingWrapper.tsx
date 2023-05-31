@@ -1,10 +1,11 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
     Config,
     AllSettings,
-    PixelStreaming
+    PixelStreaming,
+    DataChannelOpenEvent
 } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.2';
 
 export interface PixelStreamingWrapperProps {
@@ -16,6 +17,7 @@ export const PixelStreamingWrapper = ({
 }: PixelStreamingWrapperProps) => {
     // A reference to parent div element that the Pixel Streaming library attaches into:
     const videoParent = useRef<HTMLDivElement>(null);
+    const urlParams = new URLSearchParams(window.location.search);
 
     // Pixel streaming library instance is stored into this state variable after initialization:
     const [pixelStreaming, setPixelStreaming] = useState<PixelStreaming>();
@@ -49,6 +51,39 @@ export const PixelStreamingWrapper = ({
         }
     }, []);
 
+    useEffect(() => {
+        if (!pixelStreaming) return;
+        pixelStreaming.addEventListener('dataChannelOpen', (ev) => {
+            console.log(`just opened: ${ev.data.label}`, urlParams.entries());
+        });
+    }, [pixelStreaming]);
+
+    const postEvent: React.MouseEventHandler<Element> = (ev) => {
+        ev.preventDefault();
+        console.log('button click', urlParams.entries());
+        pixelStreaming.emitUIInteraction({
+            type: 'authDataReceived',
+            value: {
+                token: urlParams.get('token'),
+                joinCode: urlParams.get('joinCode'),
+                room: urlParams.get('room'),
+            },
+        });
+    }
+
+    const Button = (...props: any[]) => (
+        <div {...props} style={{
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            cursor: 'pointer',
+            color: 'rgb(138, 187, 42)',
+            border: '2px solid rgb(138, 187, 42)'
+        }} onClick={postEvent} >
+            Post My Params
+        </div>
+    );
+
     return (
         <div
             style={{
@@ -64,6 +99,7 @@ export const PixelStreamingWrapper = ({
                 }}
                 ref={videoParent}
             />
+            <Button />
             {clickToPlayVisible && (
                 <div
                     style={{
