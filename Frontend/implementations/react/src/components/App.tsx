@@ -15,7 +15,7 @@ export const App = () => {
                 initialSettings={{
                     AutoPlayVideo: true,
                     AutoConnect: true,
-                    ss: 'ws://localhost:90', // TODO: matchmaking
+                    ss: 'ws://localhost:90',
                     StartVideoMuted: true,
                     HoveringMouse: true
                 }}

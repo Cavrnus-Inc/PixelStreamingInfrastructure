@@ -87,7 +87,7 @@ export const PixelStreamingWrapper = ({
             return;
         }
 
-        pixelStreaming.emitUIInteraction({
+        const event = {
             type: 'authDataReceived',
             value: {
                 token: ssoToken,
@@ -95,7 +95,9 @@ export const PixelStreamingWrapper = ({
                 room: urlParams.get('room'),
                 domain: customerValue
             },
-        });
+        };
+        console.dir('emitUIInteraction() event')
+        pixelStreaming.emitUIInteraction(event);
     }
 
     return (
@@ -129,7 +131,7 @@ export const PixelStreamingWrapper = ({
                     type="text"
                     value={customerValue}
                     onChange={(e) => { e.preventDefault(); setCustomerValue(e.target.value)}} />
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '10px' }}>
                     <div style={{
                         cursor: 'pointer',
                         color: 'rgb(138, 187, 42)',
