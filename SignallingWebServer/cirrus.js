@@ -28,7 +28,7 @@ const defaultConfig = {
 	EnableWebserver: true,
 	MatchmakerAddress: "",
 	MatchmakerPort: 9999,
-	PublicIp: "localhost",
+	PublicIp: "localhost", // TODO: change config.json to publicIP of signaling
 	HttpPort: 80,
 	HttpsPort: 443,
 	StreamerPort: 8888,

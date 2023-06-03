@@ -81,7 +81,7 @@
   call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm link ../../library
   popd
   pushd %CD%\Frontend\library
-  call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm run build
+  call ..\..\SignallingWebServer\platform_scripts\cmd\node\npm run build
   popd
   pushd %CD%\Frontend\implementations\react
   call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm run build
