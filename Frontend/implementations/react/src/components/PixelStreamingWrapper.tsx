@@ -79,7 +79,8 @@ export const PixelStreamingWrapper = ({
                     'Authorization': `Bearer ${token}`
                 }
             });
-            console.log(response);
+            console.log('got sso token');
+            console.log(response.data);
             ssoToken = response?.data?.token;
         } catch (e) {
             console.error(`SSO token request failed with ${e.message}`);
@@ -96,7 +97,8 @@ export const PixelStreamingWrapper = ({
                 domain: customerValue
             },
         };
-        console.dir('emitUIInteraction() event')
+        console.log('emitUIInteraction() event');
+        console.log(event);
         pixelStreaming.emitUIInteraction(event);
     }
 
@@ -120,18 +122,21 @@ export const PixelStreamingWrapper = ({
                 position: 'absolute',
                 top: '20px',
                 left: '20px',
+                color: 'rgb(138, 187, 42)',
             }}>
                 User Token:
                 <input
                     type="text"
+                    style={{ margin: '5px' }}
                     value={inputValue}
                     onChange={(e) => { e.preventDefault(); setInputValue(e.target.value)}} />
                 Customer Domain:
                 <input
                     type="text"
+                    style={{ margin: '5px' }}
                     value={customerValue}
                     onChange={(e) => { e.preventDefault(); setCustomerValue(e.target.value)}} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '5px' }}>
                     <div style={{
                         cursor: 'pointer',
                         color: 'rgb(138, 187, 42)',
