@@ -63,14 +63,30 @@
   echo End of build PS frontend lib step.
 
   @Rem Do npm install in the Frontend\implementations\EpicGames directory (note we use start because that loads PATH)
+  @REM echo ----------------------------
+  @REM echo Building Epic Games reference frontend...
+  @REM pushd %CD%\Frontend\implementations\EpicGames
+  @REM call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm install
+  @REM call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm link ../../library ../../ui-library
+  @REM call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm run build-dev
+  @REM popd
+  @REM echo End of build reference frontend step.
+  @REM echo ----------------------------
+
+  @REM TODO: test 
   echo ----------------------------
-  echo Building Epic Games reference frontend...
-  pushd %CD%\Frontend\implementations\EpicGames
+  echo Building frontend...
+  pushd %CD%\Frontend\implementations\react
   call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm install
-  call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm link ../../library ../../ui-library
-  call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm run build-dev
+  call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm link ../../library
   popd
-  echo End of build reference frontend step.
+  pushd %CD%\Frontend\library
+  call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm run build
+  popd
+  pushd %CD%\Frontend\implementations\react
+  call ..\..\..\SignallingWebServer\platform_scripts\cmd\node\npm run build
+  popd
+  echo End of build frontend step
   echo ----------------------------
 
   @Rem Remove our NodeJS from the PATH

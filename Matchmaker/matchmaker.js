@@ -4,7 +4,8 @@ var enableRESTAPI = true;
 
 const defaultConfig = {
 	// The port clients connect to the matchmaking service over HTTP
-	HttpPort: 80,
+	HttpPort: 90,
+	HttpsPort: 443,
 	UseHTTPS: false,
 	// The matchmaking port the signaling service connects to the matchmaker
 	MatchmakerPort: 9999,
@@ -69,8 +70,8 @@ if (config.UseHTTPS) {
 			if (req.get('Host')) {
 				var hostAddressParts = req.get('Host').split(':');
 				var hostAddress = hostAddressParts[0];
-				if (httpsPort != 443) {
-					hostAddress = `${hostAddress}:${httpsPort}`;
+				if (config.HttpsPort != 443) {
+					hostAddress = `${hostAddress}:${config.HttpsPort}`;
 				}
 				return res.redirect(['https://', hostAddress, req.originalUrl].join(''));
 			} else {
@@ -89,7 +90,7 @@ if (config.UseHTTPS) {
 // No servers are available so send some simple JavaScript to the client to make
 // it retry after a short period of time.
 function sendRetryResponse(res) {
-	res.send(`All ${cirrusServers.size} Cirrus servers are in use. Retrying in <span id="countdown">3</span> seconds.
+	res.send(`All ${cirrusServers.size} servers are in use. Retrying in <span id="countdown">3</span> seconds.
 	<script>
 		var countdown = document.getElementById("countdown").textContent;
 		setInterval(function() {
@@ -143,10 +144,11 @@ if(enableRedirectionLinks) {
 	// Handle standard URL.
 	app.get('/', (req, res) => {
 		cirrusServer = getAvailableCirrusServer();
+		const search = req.originalUrl.split('?')[1];
+		const params = search ? `?${search}` : '';
 		if (cirrusServer != undefined) {
-			res.redirect(`http://${cirrusServer.address}:${cirrusServer.port}/`);
-			//console.log(req);
-			console.log(`Redirect to ${cirrusServer.address}:${cirrusServer.port}`);
+			res.redirect(`http://${cirrusServer.address}:${cirrusServer.port}/${params}`);
+			console.log(`Redirect to ${cirrusServer.address}:${cirrusServer.port}${params}`);
 		} else {
 			sendRetryResponse(res);
 		}
@@ -161,6 +163,13 @@ if(enableRedirectionLinks) {
 		} else {
 			sendRetryResponse(res);
 		}
+	});
+
+	app.get('/instances', (_, res) => {
+		const instances = Array.from(cirrusServers.values());
+		res.send(instances);
+		console.log('request for current servers');
+		console.log(instances);
 	});
 }
 
