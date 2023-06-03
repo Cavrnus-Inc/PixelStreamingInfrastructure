@@ -1,7 +1,7 @@
 {
 	"HttpPort": 80,
 	"HttpsPort": 443,
-	"UseHTTPS": true,
+	"UseHTTPS": false,
 	"MatchmakerPort": 9999,
 	"LogToFile": true
 }
