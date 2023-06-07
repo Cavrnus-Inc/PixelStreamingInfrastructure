@@ -22,7 +22,7 @@ export const PixelStreamingWrapper = ({
     const [sessionIdValue, setSessionIdValue] = useState(urlParams.get("session"));
     const [roomIdValue, setRoomIdValue] = useState(urlParams.get("room"));
     const [joinCodeValue, setJoinCodeValue] = useState(urlParams.get("joinCode"));
-    const [inputValue, setInputValue] = useState(urlParams.get("token"));
+    const [tokenValue, setTokenValue] = useState(urlParams.get("token"));
     const [customerValue, setCustomerValue] = useState(urlParams.get("domain"));
     const [error, setError] = useState(null);
     // Pixel streaming library instance is stored into this state variable after initialization:
@@ -65,7 +65,7 @@ export const PixelStreamingWrapper = ({
 
     const postEvent: React.MouseEventHandler<Element> = async (ev) => {
         ev.preventDefault();
-        let token = inputValue || urlParams.get('token');
+        let token = tokenValue || urlParams.get('token');
         let ssoToken;
         if (!token || !token.length) {
             setError('Token missing');
@@ -144,7 +144,7 @@ export const PixelStreamingWrapper = ({
                             type="text"
                             style={{ margin: '5px' }}
                             value={roomIdValue}
-                            onChange={(e) => { e.preventDefault(); setCustomerValue(e.target.value) }} />
+                            onChange={(e) => { e.preventDefault(); setRoomIdValue(e.target.value) }} />
                         </td>
                     </tr>
                     <tr>
@@ -153,7 +153,7 @@ export const PixelStreamingWrapper = ({
                             type="text"
                             style={{ margin: '5px' }}
                             value={joinCodeValue}
-                            onChange={(e) => { e.preventDefault(); setCustomerValue(e.target.value) }} />
+                            onChange={(e) => { e.preventDefault(); setJoinCodeValue(e.target.value) }} />
                         </td>
                     </tr>
                     <tr>
@@ -172,8 +172,8 @@ export const PixelStreamingWrapper = ({
                             <input
                                 type="text"
                                 style={{ margin: '5px' }}
-                                value={inputValue}
-                                onChange={(e) => { e.preventDefault(); setInputValue(e.target.value) }} />
+                                value={tokenValue}
+                                onChange={(e) => { e.preventDefault(); setTokenValue(e.target.value) }} />
                         </td>
                     </tr>
 
