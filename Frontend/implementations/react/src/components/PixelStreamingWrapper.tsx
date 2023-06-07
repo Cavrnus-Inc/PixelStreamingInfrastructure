@@ -19,8 +19,11 @@ export const PixelStreamingWrapper = ({
     // A reference to parent div element that the Pixel Streaming library attaches into:
     const videoParent = useRef<HTMLDivElement>(null);
     const urlParams = new URLSearchParams(window.location.search);
-    const [inputValue, setInputValue] = useState('');
-    const [customerValue, setCustomerValue] = useState('cav');
+    const [sessionIdValue, setSessionIdValue] = useState(urlParams.get("session"));
+    const [roomIdValue, setRoomIdValue] = useState(urlParams.get("room"));
+    const [joinCodeValue, setJoinCodeValue] = useState(urlParams.get("joinCode"));
+    const [inputValue, setInputValue] = useState(urlParams.get("token"));
+    const [customerValue, setCustomerValue] = useState(urlParams.get("domain"));
     const [error, setError] = useState(null);
     // Pixel streaming library instance is stored into this state variable after initialization:
     const [pixelStreaming, setPixelStreaming] = useState<PixelStreaming>();
@@ -92,8 +95,9 @@ export const PixelStreamingWrapper = ({
             type: 'authDataReceived',
             value: {
                 token: ssoToken,
-                joinCode: urlParams.get('joinCode'),
-                room: urlParams.get('room'),
+                joinCode: joinCodeValue,
+                room: roomIdValue,
+                sessionId: sessionIdValue,
                 domain: customerValue
             },
         };
@@ -124,18 +128,56 @@ export const PixelStreamingWrapper = ({
                 left: '20px',
                 color: 'rgb(138, 187, 42)',
             }}>
-                User Token:
-                <input
-                    type="text"
-                    style={{ margin: '5px' }}
-                    value={inputValue}
-                    onChange={(e) => { e.preventDefault(); setInputValue(e.target.value)}} />
-                Customer Domain:
-                <input
-                    type="text"
-                    style={{ margin: '5px' }}
-                    value={customerValue}
-                    onChange={(e) => { e.preventDefault(); setCustomerValue(e.target.value)}} />
+                <table>
+                    <tr>
+                        <td>domain:</td>
+                        <td><input
+                            type="text"
+                            style={{ margin: '5px' }}
+                            value={customerValue}
+                            onChange={(e) => { e.preventDefault(); setCustomerValue(e.target.value) }} />
+                        </td>
+                    </tr> 
+                    <tr>
+                        <td>room:</td>
+                        <td><input
+                            type="text"
+                            style={{ margin: '5px' }}
+                            value={roomIdValue}
+                            onChange={(e) => { e.preventDefault(); setCustomerValue(e.target.value) }} />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>joinCode:</td>
+                        <td><input
+                            type="text"
+                            style={{ margin: '5px' }}
+                            value={joinCodeValue}
+                            onChange={(e) => { e.preventDefault(); setCustomerValue(e.target.value) }} />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>session:</td>
+                        <td>
+                            <input
+                                type="text"
+                                style={{ margin: '5px' }}
+                                value={sessionIdValue}
+                                onChange={(e) => { e.preventDefault(); setSessionIdValue(e.target.value) }} />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>token:</td>
+                        <td>
+                            <input
+                                type="text"
+                                style={{ margin: '5px' }}
+                                value={inputValue}
+                                onChange={(e) => { e.preventDefault(); setInputValue(e.target.value) }} />
+                        </td>
+                    </tr>
+
+                </table>
                 <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '5px' }}>
                     <div style={{
                         cursor: 'pointer',
@@ -155,27 +197,29 @@ export const PixelStreamingWrapper = ({
                     </div>}
                 </ div>
             </div>
-            {clickToPlayVisible && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer'
-                    }}
-                    onClick={() => {
-                        pixelStreaming?.play();
-                        setClickToPlayVisible(false);
-                    }}
-                >
-                    <div>Click to play</div>
-                </div>
-            )}
-        </div>
+            {
+                clickToPlayVisible && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer'
+                        }}
+                        onClick={() => {
+                            pixelStreaming?.play();
+                            setClickToPlayVisible(false);
+                        }}
+                    >
+                        <div>Click to play</div>
+                    </div>
+                )
+            }
+        </div >
     );
 };
