@@ -132,10 +132,11 @@ if(enableRESTAPI) {
 	app.get('/signallingserver', cors(),  (req, res) => {
 		cirrusServer = getAvailableCirrusServer();
 		if (cirrusServer != undefined) {
-			res.json({ signallingServer: `${cirrusServer.address}:${cirrusServer.port}`});
-			console.log(`Returning ${cirrusServer.address}:${cirrusServer.port}`);
+			const streamUrl = `${cirrusServer.address}:${cirrusServer.port}`;
+			res.json({ streamUrl });
+			console.log(`Returning ${streamUrl}`);
 		} else {
-			res.json({ signallingServer: '', error: 'No signalling servers available'});
+			res.json({ streamUrl: '', error: 'No signalling servers available'});
 		}
 	});
 }
@@ -148,7 +149,7 @@ if(enableRedirectionLinks) {
 		const params = search ? `?${search}` : '';
 		if (cirrusServer != undefined) {
 			res.redirect(`http://${cirrusServer.address}:${cirrusServer.port}/${params}`);
-			console.log(`Redirect to ${cirrusServer.address}:${cirrusServer.port}${params}`);
+			console.log(`Redirect to ${cirrusServer.address}:${cirrusServer.port}/${params}`);
 		} else {
 			sendRetryResponse(res);
 		}
@@ -165,11 +166,11 @@ if(enableRedirectionLinks) {
 		}
 	});
 
+	// Return connected cirrus instances
 	app.get('/instances', (_, res) => {
 		const instances = Array.from(cirrusServers.values());
 		res.send(instances);
-		console.log('request for current servers');
-		console.log(instances);
+		console.log(`connected instances: ${JSON.stringify(instances)}`);
 	});
 }
 
@@ -262,6 +263,7 @@ const matchmaker = net.createServer((connection) => {
 				disconnect(connection);
 			}
 		} else if (message.type === 'clientDisconnected') {
+			// TODO: any cleanup necessary with the room?
 			// A client disconnects from a Cirrus server.
 			cirrusServer = cirrusServers.get(connection);
 			if(cirrusServer) {

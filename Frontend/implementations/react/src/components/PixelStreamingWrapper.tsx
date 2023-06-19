@@ -58,10 +58,19 @@ export const PixelStreamingWrapper = ({
         }
     }, []);
 
-    // useEffect(() => {
-    //     if (!pixelStreaming) return;
-    //     pixelStreaming.addEventListener('dataChannelOpen', () => {});
-    // }, [pixelStreaming]);
+    useEffect(() => {
+        if (!pixelStreaming) return;
+        pixelStreaming.addEventListener('message', (data: any) => {
+            console.log('player got message!', data);
+        });
+    }, [pixelStreaming]);
+
+    useEffect(() => {
+        if (!pixelStreaming) return;
+        pixelStreaming.addEventListener('initialSettings', (data: any) => {
+            console.log('player got initial settings!', data);
+        });
+    }, [pixelStreaming]);
 
     const postEvent: React.MouseEventHandler<Element> = async (ev) => {
         ev.preventDefault();

@@ -425,6 +425,7 @@ function onStreamerDisconnected(streamer) {
 		disconnectAllPlayers(streamer.id);
 		streamers.delete(streamer.id);
 	}
+	// TODO: room cleanup?
 }
 
 function onStreamerMessageId(streamer, msg) {
@@ -778,6 +779,7 @@ playerServer.on('connection', function (ws, req) {
 	sendPlayerConnectedToMatchmaker();
 	player.ws.send(JSON.stringify(clientConfig));
 	sendPlayersCount();
+	// TODO: set session pending => active
 });
 
 function disconnectAllPlayers(streamerId) {
