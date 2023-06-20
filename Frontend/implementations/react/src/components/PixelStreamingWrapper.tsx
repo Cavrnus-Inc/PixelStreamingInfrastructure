@@ -6,8 +6,9 @@ import {
     Config,
     AllSettings,
     PixelStreaming,
-    // DataChannelOpenEvent
+    TextParameters,
 } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.2';
+// import * as myConfig from '../../../../../SignallingWebServer/config.json';
 
 export interface PixelStreamingWrapperProps {
     initialSettings?: Partial<AllSettings>;
@@ -34,12 +35,26 @@ export const PixelStreamingWrapper = ({
     // Run on component mount:
     useEffect(() => {
         if (videoParent.current) {
-            // Attach Pixel Streaming library to videoParent element:
+            // load config from SignallingWebServer
             const config = new Config({ initialSettings });
+            console.log('updated config: ', config);
+
+            const fromConfig = config.getTextSettingValue(
+                TextParameters.SignallingServerUrl
+            );
+
+            console.log('IP from config', fromConfig);
+            console.log('IP from PS.webRTCCtrn', pixelStreaming?.serverPublicIp);
+
+            config.setTextSetting(
+                TextParameters.SignallingServerUrl,
+                pixelStreaming?.serverPublicIp,
+            );
+
+            // Attach Pixel Streaming library to videoParent element:
             const streaming = new PixelStreaming(config, {
                 videoElementParent: videoParent.current
             });
-            console.log(initialSettings);
 
             // register a playStreamRejected handler to show Click to play overlay if needed:
             streaming.addEventListener('playStreamRejected', () => {
@@ -60,15 +75,9 @@ export const PixelStreamingWrapper = ({
 
     useEffect(() => {
         if (!pixelStreaming) return;
-        pixelStreaming.addEventListener('message', (data: any) => {
-            console.log('player got message!', data);
-        });
-    }, [pixelStreaming]);
-
-    useEffect(() => {
-        if (!pixelStreaming) return;
         pixelStreaming.addEventListener('initialSettings', (data: any) => {
             console.log('player got initial settings!', data);
+            // TODO: set session online?
         });
     }, [pixelStreaming]);
 

@@ -106,6 +106,7 @@ export class WebRtcPlayerController {
     isReconnecting: boolean;
     reconnectAttempt: number;
     subscribedStream: string | null;
+    serverPublicIp: string;
     signallingUrlBuilder: () => string;
 
     // if you override the disconnection message by calling the interface method setDisconnectMessageOverride
@@ -1295,6 +1296,10 @@ export class WebRtcPlayerController {
 
         // Tell the WebRtcController to start a session with the peer options sent from the signaling server
         this.startSession(messageConfig.peerConnectionOptions);
+
+        // TODO: pass the serverPublicIp
+        this.serverPublicIp = messageConfig.serverPublicIp;
+        console.log('√ WebRTCPlayerCtrl handleConfigMessage', messageConfig);
 
         // When the signaling server sends a WebRTC Answer over the websocket connection have the WebRtcController handle the message
         this.webSocketController.onWebRtcAnswer = (

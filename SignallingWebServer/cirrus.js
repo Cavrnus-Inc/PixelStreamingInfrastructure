@@ -28,7 +28,7 @@ const defaultConfig = {
 	EnableWebserver: true,
 	MatchmakerAddress: "",
 	MatchmakerPort: 9999,
-	PublicIp: "localhost", // TODO: change config.json to publicIP of signaling
+	PublicIp: "localhost",
 	HttpPort: 80,
 	HttpsPort: 443,
 	StreamerPort: 8888,
@@ -110,13 +110,15 @@ var serverPublicIp;
 // `clientConfig` is send to Streamer and Players
 // Example of STUN server setting
 // let clientConfig = {peerConnectionOptions: { 'iceServers': [{'urls': ['stun:34.250.222.95:19302']}] }};
-var clientConfig = { type: 'config', peerConnectionOptions: {} };
+var clientConfig = { type: 'config', peerConnectionOptions: {}, serverPublicIp: null };
 
 // Parse public server address from command line
 // --publicIp <public address>
 try {
 	if (typeof config.PublicIp != 'undefined') {
 		serverPublicIp = config.PublicIp.toString();
+		console.log('Server public IP = ' + serverPublicIp);
+		clientConfig.serverPublicIp = serverPublicIp;
 	}
 
 	if (typeof config.HttpPort != 'undefined') {
@@ -779,7 +781,10 @@ playerServer.on('connection', function (ws, req) {
 	sendPlayerConnectedToMatchmaker();
 	player.ws.send(JSON.stringify(clientConfig));
 	sendPlayersCount();
+
 	// TODO: set session pending => active
+	// sessionID from creqteStream?
+	console.log('set session ACTIVE')
 });
 
 function disconnectAllPlayers(streamerId) {

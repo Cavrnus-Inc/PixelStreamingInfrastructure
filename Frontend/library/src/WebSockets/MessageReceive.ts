@@ -33,6 +33,7 @@ export class MessageAuthRequired extends MessageRecv {}
  */
 export class MessageConfig extends MessageRecv {
     peerConnectionOptions: RTCConfiguration;
+    serverPublicIp: string;
 }
 
 /**
