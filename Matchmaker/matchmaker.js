@@ -62,6 +62,7 @@ if (config.UseHTTPS) {
 	};
 
 	var https = require('https').Server(options, app);
+	// TODO: inject root-cas-cert?
 
 	//Setup http -> https redirect
 	console.log('Redirecting http->https');
@@ -132,9 +133,11 @@ if(enableRESTAPI) {
 	app.get('/signallingserver', cors(),  (req, res) => {
 		cirrusServer = getAvailableCirrusServer();
 		if (cirrusServer != undefined) {
-			const streamUrl = `${cirrusServer.address}:${cirrusServer.port}`;
+			const streamUrl = `http://${cirrusServer.address}:${cirrusServer.port}`;
 			res.json({ streamUrl });
-			console.log(`Returning ${streamUrl}`);
+			cirrusServer.sessionId = req.params.session;
+			console.log('Returning server:');
+			console.log(JSON.stringify(cirrusServer));
 		} else {
 			res.json({ streamUrl: '', error: 'No signalling servers available'});
 		}

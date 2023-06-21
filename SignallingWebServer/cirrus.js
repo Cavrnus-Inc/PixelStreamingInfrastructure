@@ -4,7 +4,7 @@
 
 var express = require('express');
 var app = express();
-
+const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const querystring = require('querystring');
@@ -117,8 +117,6 @@ var clientConfig = { type: 'config', peerConnectionOptions: {}, serverPublicIp: 
 try {
 	if (typeof config.PublicIp != 'undefined') {
 		serverPublicIp = config.PublicIp.toString();
-		console.log('Server public IP = ' + serverPublicIp);
-		clientConfig.serverPublicIp = serverPublicIp;
 	}
 
 	if (typeof config.HttpPort != 'undefined') {
@@ -692,7 +690,7 @@ function forwardPlayerMessage(player, msg) {
 	player.sendFrom(msg);
 }
 
-function onPlayerDisconnected(playerId) {
+async function onPlayerDisconnected(playerId) {
 	const player = players.get(playerId);
 	player.unsubscribe();
 	players.delete(playerId);
@@ -700,6 +698,7 @@ function onPlayerDisconnected(playerId) {
 	sendPlayersCount();
 	sendPlayerDisconnectedToFrontend();
 	sendPlayerDisconnectedToMatchmaker();
+	await deleteSession();
 }
 
 playerMessageHandlers.set('subscribe', onPlayerMessageSubscribe);
@@ -715,7 +714,7 @@ playerMessageHandlers.set('peerDataChannelsReady', forwardPlayerMessage);
 
 console.logColor(logging.Green, `WebSocket listening for Players connections on :${httpPort}`);
 let playerServer = new WebSocket.Server({ server: config.UseHTTPS ? https : http});
-playerServer.on('connection', function (ws, req) {
+playerServer.on('connection', async function (ws, req) {
 	var url = require('url');
 	const parsedUrl = url.parse(req.url);
 	const urlParams = new URLSearchParams(parsedUrl.search);
@@ -763,15 +762,15 @@ playerServer.on('connection', function (ws, req) {
 		handler(player, msg);
 	});
 
-	ws.on('close', function(code, reason) {
+	ws.on('close', async function(code, reason) {
 		console.logColor(logging.Yellow, `player ${playerId} connection closed: ${code} - ${reason}`);
-		onPlayerDisconnected(playerId);
+		await onPlayerDisconnected(playerId);
 	});
 
-	ws.on('error', function(error) {
+	ws.on('error', async function(error) {
 		console.error(`player ${playerId} connection error: ${error}`);
 		ws.close(1006 /* abnormal closure */, error);
-		onPlayerDisconnected(playerId);
+		await onPlayerDisconnected(playerId);
 
 		console.logColor(logging.Red, `Trying to reconnect...`);
 		reconnect();
@@ -781,11 +780,32 @@ playerServer.on('connection', function (ws, req) {
 	sendPlayerConnectedToMatchmaker();
 	player.ws.send(JSON.stringify(clientConfig));
 	sendPlayersCount();
-
-	// TODO: set session pending => active
-	// sessionID from creqteStream?
-	console.log('set session ACTIVE')
+	await setSessionActive();
 });
+
+async function getSessionId () {
+	const response = await axios.get('https://matchmaker.stream.cavrn.us', { httpsAgent: { rejectUnauthorized: false }});
+	console.log('\n matchmaker response');
+	console.log(response.data);
+	const found = response.data.find((server) => server.address === serverPublicIp);
+	return found.sessionId;
+}
+
+async function setSessionActive () {
+	const sessionId = await getSessionId();
+	console.log('session active: ' + sessionId);
+	try {
+		await axios.post(`${config.CavAPI}/stream-clients/${sessionId}/active`);
+	} catch (error) {
+		console.error(error)
+	}
+}
+
+async function deleteSession () {
+	const sessionId = await getSessionId();
+	console.log('deleting session ' + sessionId);
+	await axios.delete(`${config.CavAPI}/stream-clients/${sessionId}`);
+}
 
 function disconnectAllPlayers(streamerId) {
 	console.log(`unsubscribing all players on ${streamerId}`);

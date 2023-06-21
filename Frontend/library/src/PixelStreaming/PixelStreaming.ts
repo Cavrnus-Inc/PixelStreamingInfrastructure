@@ -101,10 +101,6 @@ export class PixelStreaming {
         this._webXrController = new WebXRController(this._webRtcController);
     }
 
-    public get serverPublicIp(): string {
-        return this._webRtcController.serverPublicIp;
-    }
-
     /**
      * Gets the element that contains the video stream element.
      */

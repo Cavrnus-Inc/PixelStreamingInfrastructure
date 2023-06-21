@@ -1,4 +1,5 @@
 {
+	"CavAPI": "https://localhost:4000",
 	"UseFrontend": false,
 	"UseMatchmaker": true,
 	"UseHTTPS": false,

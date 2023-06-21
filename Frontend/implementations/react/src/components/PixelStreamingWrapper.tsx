@@ -6,7 +6,6 @@ import {
     Config,
     AllSettings,
     PixelStreaming,
-    TextParameters,
 } from '@epicgames-ps/lib-pixelstreamingfrontend-ue5.2';
 // import * as myConfig from '../../../../../SignallingWebServer/config.json';
 
@@ -39,18 +38,6 @@ export const PixelStreamingWrapper = ({
             const config = new Config({ initialSettings });
             console.log('updated config: ', config);
 
-            const fromConfig = config.getTextSettingValue(
-                TextParameters.SignallingServerUrl
-            );
-
-            console.log('IP from config', fromConfig);
-            console.log('IP from PS.webRTCCtrn', pixelStreaming?.serverPublicIp);
-
-            config.setTextSetting(
-                TextParameters.SignallingServerUrl,
-                pixelStreaming?.serverPublicIp,
-            );
-
             // Attach Pixel Streaming library to videoParent element:
             const streaming = new PixelStreaming(config, {
                 videoElementParent: videoParent.current
@@ -72,14 +59,6 @@ export const PixelStreamingWrapper = ({
             };
         }
     }, []);
-
-    useEffect(() => {
-        if (!pixelStreaming) return;
-        pixelStreaming.addEventListener('initialSettings', (data: any) => {
-            console.log('player got initial settings!', data);
-            // TODO: set session online?
-        });
-    }, [pixelStreaming]);
 
     const postEvent: React.MouseEventHandler<Element> = async (ev) => {
         ev.preventDefault();
