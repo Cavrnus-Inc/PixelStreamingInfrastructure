@@ -784,27 +784,39 @@ playerServer.on('connection', async function (ws, req) {
 });
 
 async function getSessionId () {
-	const response = await axios.get('https://matchmaker.stream.cavrn.us', { httpsAgent: { rejectUnauthorized: false }});
+	const response = await axios.get(`${config.MatchmakerAddress}/instances`, { httpsAgent: { rejectUnauthorized: false }});
 	console.log('\n matchmaker response');
 	console.log(response.data);
 	const found = response.data.find((server) => server.address === serverPublicIp);
-	return found.sessionId;
+	return found?.sessionId;
 }
 
 async function setSessionActive () {
 	const sessionId = await getSessionId();
+	if (!sessionId) {
+		console.logColor(logging.Red, `Failed to set session active, missing sessionId`);
+		return;
+	}
 	console.log('session active: ' + sessionId);
 	try {
 		await axios.post(`${config.CavAPI}/stream-clients/${sessionId}/active`);
 	} catch (error) {
-		console.error(error)
+		console.error(error);
 	}
 }
 
 async function deleteSession () {
 	const sessionId = await getSessionId();
-	console.log('deleting session ' + sessionId);
-	await axios.delete(`${config.CavAPI}/stream-clients/${sessionId}`);
+	if (!sessionId) {
+		console.logColor(logging.Red, `Failed to delete session, missing sessionId`);
+		return;
+	}
+	console.log('deleting session: ' + sessionId);
+	try {
+		await axios.delete(`${config.CavAPI}/stream-clients/${sessionId}`);
+	} catch (error) {
+		console.error(error);
+	}
 }
 
 function disconnectAllPlayers(streamerId) {

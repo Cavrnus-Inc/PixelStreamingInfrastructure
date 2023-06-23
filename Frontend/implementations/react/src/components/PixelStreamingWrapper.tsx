@@ -36,7 +36,7 @@ export const PixelStreamingWrapper = ({
         if (videoParent.current) {
             // load config from SignallingWebServer
             const config = new Config({ initialSettings });
-            console.log('updated config: ', config);
+            console.log('Config:', config);
 
             // Attach Pixel Streaming library to videoParent element:
             const streaming = new PixelStreaming(config, {
@@ -79,8 +79,6 @@ export const PixelStreamingWrapper = ({
                     'Authorization': `Bearer ${token}`
                 }
             });
-            console.log('got sso token');
-            console.log(response.data);
             ssoToken = response?.data?.token;
         } catch (e) {
             console.error(`SSO token request failed with ${e.message}`);
@@ -98,7 +96,7 @@ export const PixelStreamingWrapper = ({
                 domain: customerValue
             },
         };
-        console.log('emitUIInteraction() event');
+        console.log('emitUIInteraction() event: ');
         console.log(event);
         pixelStreaming.emitUIInteraction(event);
     }
