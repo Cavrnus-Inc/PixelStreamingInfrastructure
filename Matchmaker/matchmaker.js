@@ -134,15 +134,13 @@ if(enableRESTAPI) {
 		cirrusServer = getAvailableCirrusServer();
 		if (cirrusServer != undefined) {
 			const streamUrl = `http://${cirrusServer.address}:${cirrusServer.port}`;
-			const search = req.originalUrl.split('?')[1];
-			cirrusServer.sessionId = search.session;
-			if (!search.session) {
-				res.json({ streamUrl: null, error: 'Missing session' });
-		    } else {
-				res.json({ streamUrl });
-				console.log(`Pending session ${sessionId} for signallingserver ${cirrusServer.address}`);
-				console.log(JSON.stringify(cirrusServer));
+			const url = new URL(req.originalUrl);
+			if (url.searchParams.session) {
+				cirrusServer.sessionId = url.searchParams.session;
 			}
+			res.json({ streamUrl });
+			console.log(`Pending session ${sessionId} for signallingserver ${cirrusServer.address}`);
+			console.log(JSON.stringify(cirrusServer));
 		} else {
 			res.json({ streamUrl: null, error: 'No signalling servers available'});
 		}
