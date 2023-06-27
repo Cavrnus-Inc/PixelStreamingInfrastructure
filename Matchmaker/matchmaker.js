@@ -134,12 +134,13 @@ if(enableRESTAPI) {
 		cirrusServer = getAvailableCirrusServer();
 		if (cirrusServer != undefined) {
 			const streamUrl = `http://${cirrusServer.address}:${cirrusServer.port}`;
-			const url = new URL(req.originalUrl);
-			if (url.searchParams.session) {
-				cirrusServer.sessionId = url.searchParams.session;
+			const [, paramString] = req.originalUrl.split('?');
+			const params =  new URLSearchParams(paramString);
+			if (params.session) {
+				cirrusServer.sessionId = params.session;
 			}
 			res.json({ streamUrl });
-			console.log(`Pending session ${sessionId} for signallingserver ${cirrusServer.address}`);
+			console.log(`Pending stream client session ${cirrusServer.sessionId} Returning host ${cirrusServer.address}`);
 			console.log(JSON.stringify(cirrusServer));
 		} else {
 			res.json({ streamUrl: null, error: 'No signalling servers available'});

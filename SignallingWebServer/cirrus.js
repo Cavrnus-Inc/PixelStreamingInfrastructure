@@ -799,7 +799,7 @@ async function setSessionActive () {
 	}
 	console.log('session active: ' + sessionId);
 	try {
-		await axios.post(`${config.CavAPI}/stream-clients/${sessionId}/active`);
+		await axios.post(`${config.CavAPI}/work/stream-clients/${sessionId}/active`);
 	} catch (error) {
 		console.error(error);
 	}
@@ -813,7 +813,7 @@ async function deleteSession () {
 	}
 	console.log('deleting session: ' + sessionId);
 	try {
-		await axios.delete(`${config.CavAPI}/stream-clients/${sessionId}`);
+		await axios.delete(`${config.CavAPI}/work/stream-clients/${sessionId}`);
 	} catch (error) {
 		console.error(error);
 	}
