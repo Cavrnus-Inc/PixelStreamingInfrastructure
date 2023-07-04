@@ -151,17 +151,18 @@ if(enableRESTAPI) {
 		const params =  new URLSearchParams(paramString);
 		let streamUrl = null, cirrusServer;
 		if (params.has('session')) {
+			const sessionId = params.get('session');
 			// get a server the user may still be logged in to
-			cirrusServer = getCirrusServerBySessionId(params.get('session'));
+			cirrusServer = getCirrusServerBySessionId(sessionId);
 			if (cirrusServer) {
-				console.log(`Returning previously claimed server for session ${params.get('session')},
+				console.log(`Returning previously claimed server for session ${sessionId},
 				 last occupied ${Math.round((Date.now() - cirrusServer.lastOccupied)/1000)} seconds ago`);
 				streamUrl = getStreamUrl(cirrusServer);
 			} else {
 				// get an available server
 				cirrusServer = getAvailableCirrusServer();
 				if (cirrusServer) {
-					if (cirrusServer.clientSessionId && cirrusServer.clientSessionId !== params.get('session')) {
+					if (cirrusServer.clientSessionId && cirrusServer.clientSessionId !== sessionId) {
 						console.log(`New session on instance. Last occupied: ${Math.round((Date.now() - cirrusServer.lastOccupied)/1000)}
 						 seconds ago by session ${cirrusServer.clientSessionId}`)
 					}
@@ -173,7 +174,7 @@ if(enableRESTAPI) {
 					return;
 				}
 			}
-			cirrusServer.clientSessionId = params.get('session');
+			cirrusServer.clientSessionId = sessionId;
 			cirrusServer.lastOccupied = Date.now();
 			res.json({ streamUrl });
 		} else {
