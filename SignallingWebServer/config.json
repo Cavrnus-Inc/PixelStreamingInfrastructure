@@ -1,5 +1,5 @@
 {
-	"CavAPI": "http://localhost:4000", // https://dae0-47-151-141-205.ngrok-free.app
+	"CavAPI": "https://api.dev.cavrn.us",
 	"UseFrontend": false,
 	"UseMatchmaker": true,
 	"UseHTTPS": false,
@@ -9,7 +9,8 @@
 	"HomepageFile": "player.html",
 	"AdditionalRoutes": {},
 	"EnableWebserver": true,
-	"MatchmakerAddress": "https://matchmaker.stream.cavrn.us",
+	"MatchmakerAddress": "34.228.115.212",
+	"MatchmakerUrl": "https://matchmaker.stream.cavrn.us",
 	"MatchmakerPort": 9999,
 	"PublicIp": "localhost",
 	"HttpPort": 80,

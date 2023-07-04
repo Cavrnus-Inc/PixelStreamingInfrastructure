@@ -698,7 +698,7 @@ async function onPlayerDisconnected(playerId) {
 	sendPlayersCount();
 	sendPlayerDisconnectedToFrontend();
 	sendPlayerDisconnectedToMatchmaker();
-	await deleteSession();
+	await setSessionIdle();
 }
 
 playerMessageHandlers.set('subscribe', onPlayerMessageSubscribe);
@@ -784,14 +784,15 @@ playerServer.on('connection', async function (ws, req) {
 });
 
 async function getSessionId () {
-	const response = await axios.get(`${config.MatchmakerAddress}/instances`, { httpsAgent: { rejectUnauthorized: false }});
-	console.log('\n matchmaker response');
+	const response = await axios.get(`${config.MatchmakerUrl}/instances`, { httpsAgent: { rejectUnauthorized: false }});
+	console.log('Matchmaker response sessionId?');
 	console.log(response.data);
 	const found = response.data.find((server) => server.address === serverPublicIp);
-	return found?.sessionId;
+	return found?.clientSessionId;
 }
 
 async function setSessionActive () {
+	console.log("SET ACTIVE server " + serverPublicIp);
 	const sessionId = await getSessionId();
 	if (!sessionId) {
 		console.logColor(logging.Red, `Failed to set session active, missing sessionId`);
@@ -805,15 +806,15 @@ async function setSessionActive () {
 	}
 }
 
-async function deleteSession () {
+async function setSessionIdle () {
 	const sessionId = await getSessionId();
 	if (!sessionId) {
-		console.logColor(logging.Red, `Failed to delete session, missing sessionId`);
+		console.logColor(logging.Red, `Failed to update session, missing sessionId`);
 		return;
 	}
-	console.log('deleting session: ' + sessionId);
+	console.log('SET IDLE session: ' + sessionId);
 	try {
-		await axios.delete(`${config.CavAPI}/work/stream-clients/${sessionId}`);
+		await axios.post(`${config.CavAPI}/work/stream-clients/${sessionId}/idle`);
 	} catch (error) {
 		console.error(error);
 	}

@@ -1,5 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-var enableRedirectionLinks = true;
+var enableRedirectionLinks = false;
 var enableRESTAPI = true;
 
 const defaultConfig = {
@@ -116,6 +116,10 @@ function getAvailableCirrusServer() {
 			if( cirrusServer.hasOwnProperty('lastRedirect')) {
 				if( ((Date.now() - cirrusServer.lastRedirect) / 1000) < 10 )
 					continue;
+				// Check if the last time a SS was occupied was under 1 minute ago, giving
+				// a user time to reconnect to a logged in session
+				if ((Date.now() - cirrusServer.lastOccupied) / 1000 < 60)
+					continue;
 			}
 			cirrusServer.lastRedirect = Date.now();
 
@@ -127,24 +131,70 @@ function getAvailableCirrusServer() {
 	return undefined;
 }
 
+// find a Cirrus server with a matching sesion Id
+function getCirrusServerBySessionId(sessionId) {
+	for (cirrusServer of cirrusServers.values()) {
+		if (cirrusServer.clientSessionId === sessionId)
+			cirrusServer.lastRedirect = Date.now();
+			return cirrusServer;
+	}
+	return null;
+}
+
+const getStreamUrl = (cirrusServer) => cirrusServer ? `http://${cirrusServer.address}:${cirrusServer.port}` : null;
+
 if(enableRESTAPI) {
 	// Handle REST signalling server only request.
 	app.options('/signallingserver', cors())
 	app.get('/signallingserver', cors(),  (req, res) => {
-		cirrusServer = getAvailableCirrusServer();
-		if (cirrusServer != undefined) {
-			const streamUrl = `http://${cirrusServer.address}:${cirrusServer.port}`;
-			const [, paramString] = req.originalUrl.split('?');
-			const params =  new URLSearchParams(paramString);
-			if (params.session) {
-				cirrusServer.sessionId = params.session;
+		const [, paramString] = req.originalUrl.split('?');
+		const params =  new URLSearchParams(paramString);
+		let streamUrl = null, cirrusServer;
+		if (params.has('session')) {
+			// get a server the user may still be logged in to
+			cirrusServer = getCirrusServerBySessionId(params.get('session'));
+			if (cirrusServer) {
+				console.log(`Returning previously claimed server for session ${params.get('session')},
+				 last occupied ${Math.round((Date.now() - cirrusServer.lastOccupied)/1000)} seconds ago`);
+				streamUrl = getStreamUrl(cirrusServer);
+			} else {
+				// get an available server
+				cirrusServer = getAvailableCirrusServer();
+				if (cirrusServer) {
+					if (cirrusServer.clientSessionId && cirrusServer.clientSessionId !== params.get('session')) {
+						console.log(`New session on instance. Last occupied: ${Math.round((Date.now() - cirrusServer.lastOccupied)/1000)}
+						 seconds ago by session ${cirrusServer.clientSessionId}`)
+					}
+					streamUrl = getStreamUrl(cirrusServer);
+					console.log(`Return pending stream client session ${cirrusServer.clientSessionId} for host: ${cirrusServer.address}`);
+					console.log(JSON.stringify(cirrusServer));
+				} else {
+					res.json({ streamUrl, error: 'No signalling server available'});
+					return;
+				}
 			}
+			cirrusServer.clientSessionId = params.get('session');
+			cirrusServer.lastOccupied = Date.now();
 			res.json({ streamUrl });
-			console.log(`Pending stream client session ${cirrusServer.sessionId} Returning host ${cirrusServer.address}`);
-			console.log(JSON.stringify(cirrusServer));
 		} else {
-			res.json({ streamUrl: null, error: 'No signalling servers available'});
+			res.json({ streamUrl, error: 'Missing required parameter'});
 		}
+	});
+	// Return connected cirrus instances
+	app.options('/instances', cors());
+	app.get('/instances', cors(), (_, res) => {
+		const instances = Array.from(cirrusServers.values());
+		res.send(instances);
+		console.log(`Connected instances: ${JSON.stringify(instances)}`);
+	});
+	// Return a claimed Cirrus server (to prevent being routed to a different server on refresh)
+	app.options('/session/:id', cors());
+	app.get('/session/:id', cors(), (req, res) => {
+		const sessionId = req.params.id;
+		const cirrusServer = getCirrusServerBySessionId(sessionId);
+		const streamUrl = getStreamUrl(cirrusServer);
+		res.json({ streamUrl });
+		console.log(`Matching Cirrus server for session ${sessionId}: ${cirrusServer.address}`);
 	});
 }
 
@@ -171,13 +221,6 @@ if(enableRedirectionLinks) {
 		} else {
 			sendRetryResponse(res);
 		}
-	});
-
-	// Return connected cirrus instances
-	app.get('/instances', (_, res) => {
-		const instances = Array.from(cirrusServers.values());
-		res.send(instances);
-		console.log(`connected instances: ${JSON.stringify(instances)}`);
 	});
 }
 
@@ -263,6 +306,7 @@ const matchmaker = net.createServer((connection) => {
 		} else if (message.type === 'clientConnected') {
 			// A client connects to a Cirrus server.
 			cirrusServer = cirrusServers.get(connection);
+			console.log('client connected', cirrusServer)
 			if(cirrusServer) {
 				cirrusServer.numConnectedClients++;
 				console.log(`Client connected to Cirrus server ${cirrusServer.address}:${cirrusServer.port}`);
@@ -283,10 +327,14 @@ const matchmaker = net.createServer((connection) => {
 			} else {				
 				disconnect(connection);
 			}
-		} else if (message.type === 'ping') {
+		} else if (message.type === 'ping') { // matchmakerKeepAliveInterval
 			cirrusServer = cirrusServers.get(connection);
 			if(cirrusServer) {
-				cirrusServer.lastPingReceived = Date.now();
+				const now = Date.now();
+				cirrusServer.lastPingReceived = now;
+				if (cirrusServer.numConnectedClients > 0) {
+					cirrusServer.lastOccupied = now;
+				}
 			} else {				
 				disconnect(connection);
 			}
