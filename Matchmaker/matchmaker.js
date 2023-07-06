@@ -155,8 +155,9 @@ if(enableRESTAPI) {
 			// get a server the user may still be logged in to
 			cirrusServer = getCirrusServerBySessionId(sessionId);
 			if (cirrusServer) {
-				console.log(`Returning previously claimed server for session ${sessionId},
-				 last occupied ${Math.round((Date.now() - cirrusServer.lastOccupied)/1000)} seconds ago`);
+				console.log(`Returning previously claimed server for session ${sessionId}, last occupied ${
+					cirrusServer.lastOccupied ? Math.round((Date.now() - cirrusServer.lastOccupied)/1000) : 'never'
+				} seconds ago`);
 				streamUrl = getStreamUrl(cirrusServer);
 			} else {
 				// get an available server
@@ -196,6 +197,17 @@ if(enableRESTAPI) {
 		const streamUrl = getStreamUrl(cirrusServer);
 		res.json({ streamUrl });
 		console.log(`Matching Cirrus server for session ${sessionId}: ${cirrusServer.address}`);
+	});
+
+	// route to clear sessionId from instance on EXPIRE from worker
+	app.options('/session/:id/expire', cors());
+	app.get('/session/:id/expire', cors(), (req, res) => {
+		const sessionId = req.params.id;
+		const cirrusServer = getCirrusServerBySessionId(sessionId);
+		if (cirrusServer) {
+			console.log('Expired session ' + sessionId);
+			delete cirrusServer.clientSessionId;
+		}
 	});
 }
 
