@@ -785,24 +785,22 @@ playerServer.on('connection', async function (ws, req) {
 
 async function getSessionId () {
 	const response = await axios.get(`${config.MatchmakerUrl}/instances`, { httpsAgent: { rejectUnauthorized: false }});
-	console.log('Matchmaker response sessionId?');
-	console.log(response.data);
 	const found = response.data.find((server) => server.address === serverPublicIp);
 	return found?.clientSessionId;
 }
 
 async function setSessionActive () {
-	console.log("SET ACTIVE server " + serverPublicIp);
 	const sessionId = await getSessionId();
 	if (!sessionId) {
 		console.logColor(logging.Red, `Failed to set session active, missing sessionId`);
 		return;
 	}
-	console.log('session active: ' + sessionId);
+	console.log("SET ACTIVE server " + serverPublicIp + " session: " + sessionId);
 	try {
 		await axios.post(`${config.CavAPI}/work/stream-clients/${sessionId}/active`);
 	} catch (error) {
-		console.error(error);
+		console.error('Error setting session active worker api')
+		console.logColor(logging.Red, error.response.data);
 	}
 }
 
@@ -816,7 +814,8 @@ async function setSessionIdle () {
 	try {
 		await axios.post(`${config.CavAPI}/work/stream-clients/${sessionId}/idle`);
 	} catch (error) {
-		console.error(error);
+		console.error('Error setting session idle worker api')
+		console.logColor(logging.Red, error.response.data);
 	}
 }
 
