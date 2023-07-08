@@ -25,6 +25,7 @@ export const PixelStreamingWrapper = ({
     const [tokenValue, setTokenValue] = useState(urlParams.get("token"));
     const [customerValue, setCustomerValue] = useState(urlParams.get("domain"));
     const [error, setError] = useState(null);
+    const [inputsVisible, setInputsVisible] = useState(true);
     // Pixel streaming library instance is stored into this state variable after initialization:
     const [pixelStreaming, setPixelStreaming] = useState<PixelStreaming>();
 
@@ -61,7 +62,7 @@ export const PixelStreamingWrapper = ({
     }, []);
 
     const postEvent: React.MouseEventHandler<Element> = async (ev) => {
-        ev.preventDefault();
+        ev?.preventDefault();
         if (!tokenValue || !tokenValue.length) {
             setError('Token missing');
             return;
@@ -77,6 +78,7 @@ export const PixelStreamingWrapper = ({
                 domain: customerValue
             },
         };
+        pixelStreaming?.play();
         console.log('emitUIInteraction()', event);
         pixelStreaming.emitUIInteraction(event);
     }
@@ -96,82 +98,95 @@ export const PixelStreamingWrapper = ({
                 }}
                 ref={videoParent}
             />
-            <div style={{
-                zIndex: 999,
-                position: 'absolute',
-                top: '20px',
-                left: '20px',
-                color: 'rgb(138, 187, 42)',
-            }}>
-                <table>
-                    <tr>
-                        <td>domain:</td>
-                        <td><input
-                            type="text"
-                            style={{ margin: '5px' }}
-                            value={customerValue}
-                            onChange={(e) => { e.preventDefault(); setCustomerValue(e.target.value) }} />
-                        </td>
-                    </tr> 
-                    <tr>
-                        <td>room:</td>
-                        <td><input
-                            type="text"
-                            style={{ margin: '5px' }}
-                            value={roomIdValue}
-                            onChange={(e) => { e.preventDefault(); setRoomIdValue(e.target.value) }} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>joinCode:</td>
-                        <td><input
-                            type="text"
-                            style={{ margin: '5px' }}
-                            value={joinCodeValue}
-                            onChange={(e) => { e.preventDefault(); setJoinCodeValue(e.target.value) }} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>session:</td>
-                        <td>
-                            <input
+            {inputsVisible && (
+                <div style={{
+                    zIndex: 99,
+                    position: 'absolute',
+                    top: '20px',
+                    left: '20px',
+                    color: 'rgb(138, 187, 42)',
+                }}>
+                    <table>
+                        <tr>
+                            <td>domain:</td>
+                            <td><input
                                 type="text"
                                 style={{ margin: '5px' }}
-                                value={sessionIdValue}
-                                onChange={(e) => { e.preventDefault(); setSessionIdValue(e.target.value) }} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>token:</td>
-                        <td>
-                            <input
+                                value={customerValue}
+                                onChange={(e) => { e.preventDefault(); setCustomerValue(e.target.value) }} />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>room:</td>
+                            <td><input
                                 type="text"
                                 style={{ margin: '5px' }}
-                                value={tokenValue}
-                                onChange={(e) => { e.preventDefault(); setTokenValue(e.target.value) }} />
-                        </td>
-                    </tr>
+                                value={roomIdValue}
+                                onChange={(e) => { e.preventDefault(); setRoomIdValue(e.target.value) }} />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>joinCode:</td>
+                            <td><input
+                                type="text"
+                                style={{ margin: '5px' }}
+                                value={joinCodeValue}
+                                onChange={(e) => { e.preventDefault(); setJoinCodeValue(e.target.value) }} />
+                            </td>
+                        </tr>d
+                        <tr>
+                            <td>session:</td>
+                            <td>
+                                <input
+                                    type="text"
+                                    style={{ margin: '5px' }}
+                                    value={sessionIdValue}
+                                    onChange={(e) => { e.preventDefault(); setSessionIdValue(e.target.value) }} />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>token:</td>
+                            <td>
+                                <input
+                                    type="text"
+                                    style={{ margin: '5px' }}
+                                    value={tokenValue}
+                                    onChange={(e) => { e.preventDefault(); setTokenValue(e.target.value) }} />
+                            </td>
+                        </tr>
 
-                </table>
-                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '5px' }}>
-                    <div style={{
-                        cursor: 'pointer',
-                        color: 'rgb(138, 187, 42)',
-                        border: '2px solid rgb(138, 187, 42)',
-                        padding: '5px',
-                        textAlign: 'center',
-                        width: '150px'
-                    }} onClick={postEvent} >
-                        Log In with SSO
+                    </table>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '5px' }}>
+                        <div style={{
+                            cursor: 'pointer',
+                            color: 'rgb(138, 187, 42)',
+                            border: '2px solid rgb(138, 187, 42)',
+                            padding: '5px',
+                            textAlign: 'center',
+                            width: '150px'
+                        }} onClick={postEvent} >
+                            Log In with SSO
+                        </div>
+                        {error && <div style={{
+                            padding: '5px',
+                            color: 'red',
+                        }}>
+                            {error}
+                        </div>}
+                    </ div>
+                    <div style={{ display: 'flex', paddingTop: '5px' }}>
+                        <div style={{
+                            cursor: 'pointer',
+                            color: 'rgb(138, 187, 42)',
+                            padding: '5px',
+                            textAlign: 'center',
+                            width: '75px'
+                        }} onClick={() => setInputsVisible(false)}>
+                            close
+                        </div>
                     </div>
-                    {error && <div style={{
-                        padding: '5px',
-                        color: 'red',
-                    }}>
-                        {error}
-                    </div>}
-                </ div>
-            </div>
+                </div>
+            )}
             {
                 clickToPlayVisible && (
                     <div
@@ -189,6 +204,7 @@ export const PixelStreamingWrapper = ({
                         onClick={() => {
                             pixelStreaming?.play();
                             setClickToPlayVisible(false);
+                            postEvent(null);
                         }}
                     >
                         <div>Click to play</div>

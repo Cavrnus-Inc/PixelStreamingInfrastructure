@@ -805,7 +805,7 @@ async function setSessionActive () {
 		await axios.post(`${config.CavAPI}/work/stream-clients/${sessionId}/active`);
 	} catch (error) {
 		console.error('Error setting session active worker api')
-		console.logColor(logging.Red, error.response.data);
+		console.logColor(logging.Red, error.message ||  error.response?.statusText);
 	}
 }
 
@@ -820,7 +820,7 @@ async function setSessionIdle () {
 		await axios.post(`${config.CavAPI}/work/stream-clients/${sessionId}/idle`);
 	} catch (error) {
 		console.error('Error setting session idle worker api')
-		console.logColor(logging.Red, error.response.data);
+		console.logColor(logging.Red, error.response?.statusText);
 	}
 }
 
