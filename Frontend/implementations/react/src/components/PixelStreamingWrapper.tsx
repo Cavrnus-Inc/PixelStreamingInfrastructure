@@ -62,42 +62,22 @@ export const PixelStreamingWrapper = ({
 
     const postEvent: React.MouseEventHandler<Element> = async (ev) => {
         ev.preventDefault();
-        let token = tokenValue || urlParams.get('token');
-        let ssoToken;
-        if (!token || !token.length) {
+        if (!tokenValue || !tokenValue.length) {
             setError('Token missing');
-            return;
-        }
-
-        try {
-            setError(null);
-            const response = await axios.post('https://api.dev.cavrn.us/api/sso/token', {}, {
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Content-Type': 'application/json',
-                    'X-Customer-Domain': customerValue,
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            ssoToken = response?.data?.token;
-        } catch (e) {
-            console.error(`SSO token request failed with ${e.message}`);
-            setError(`${e.message}: ${e.response.data.message}`);
             return;
         }
 
         const event = {
             type: 'authDataReceived',
             value: {
-                token: ssoToken,
+                token: tokenValue,
                 joinCode: joinCodeValue,
                 room: roomIdValue,
                 sessionId: sessionIdValue,
                 domain: customerValue
             },
         };
-        console.log('emitUIInteraction() event: ');
-        console.log(event);
+        console.log('emitUIInteraction()', event);
         pixelStreaming.emitUIInteraction(event);
     }
 

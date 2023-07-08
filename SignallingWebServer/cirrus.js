@@ -784,9 +784,14 @@ playerServer.on('connection', async function (ws, req) {
 });
 
 async function getSessionId () {
-	const response = await axios.get(`${config.MatchmakerUrl}/instances`, { httpsAgent: { rejectUnauthorized: false }});
-	const found = response.data.find((server) => server.address === serverPublicIp);
-	return found?.clientSessionId;
+	try {
+		const response = await axios.get(`${config.MatchmakerUrl}/instances`);
+		const found = response.data.find((server) => server.address === serverPublicIp);
+		return found?.clientSessionId;
+	} catch (error) {
+		console.logColor(logging.Red, `Failed matchmaker request for ${serverPublicIp}`);
+		return null;
+	}
 }
 
 async function setSessionActive () {

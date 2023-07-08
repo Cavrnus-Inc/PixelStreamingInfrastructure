@@ -73,7 +73,6 @@
   @REM echo End of build reference frontend step.
   @REM echo ----------------------------
 
-  @REM TODO: test 
   echo ----------------------------
   echo Building frontend...
   pushd %CD%\Frontend\implementations\react
