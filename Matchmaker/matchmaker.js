@@ -168,8 +168,7 @@ if(enableRESTAPI) {
 						 seconds ago by session ${cirrusServer.clientSessionId}`)
 					}
 					streamUrl = getStreamUrl(cirrusServer);
-					console.log(`Return pending stream client session ${cirrusServer.clientSessionId} for host: ${cirrusServer.address}`);
-					console.log(JSON.stringify(cirrusServer));
+					console.log(`Return pending stream client session ${cirrusServer.clientSessionId} on host: ${cirrusServer.address}`);
 				} else {
 					res.json({ streamUrl, error: 'No signalling server available'});
 					return;
@@ -201,13 +200,14 @@ if(enableRESTAPI) {
 
 	// route to clear sessionId from instance on EXPIRE from worker
 	app.options('/session/:id/expire', cors());
-	app.get('/session/:id/expire', cors(), (req, res) => {
+	app.post('/session/:id/expire', cors(), (req, res) => {
 		const sessionId = req.params.id;
 		const cirrusServer = getCirrusServerBySessionId(sessionId);
 		if (cirrusServer) {
 			console.log('Expired session ' + sessionId);
 			delete cirrusServer.clientSessionId;
 		}
+		res.sendStatus(200);
 	});
 }
 
@@ -319,7 +319,6 @@ const matchmaker = net.createServer((connection) => {
 		} else if (message.type === 'clientConnected') {
 			// A client connects to a Cirrus server.
 			cirrusServer = cirrusServers.get(connection);
-			console.log('client connected', cirrusServer)
 			if(cirrusServer) {
 				cirrusServer.numConnectedClients++;
 				console.log(`Client connected to Cirrus server ${cirrusServer.address}:${cirrusServer.port}`);

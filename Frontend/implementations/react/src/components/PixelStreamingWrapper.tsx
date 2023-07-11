@@ -23,7 +23,7 @@ export const PixelStreamingWrapper = ({
     const [roomIdValue, setRoomIdValue] = useState(urlParams.get("room"));
     const [joinCodeValue, setJoinCodeValue] = useState(urlParams.get("joinCode"));
     const [tokenValue, setTokenValue] = useState(urlParams.get("token"));
-    const [customerValue, setCustomerValue] = useState(urlParams.get("domain"));
+    const [customerValue, setCustomerValue] = useState(urlParams.get("domain") === 'cav' ? 'cav.dev.cavrn.us' : urlParams.get("domain"));
     const [error, setError] = useState(null);
     const [inputsVisible, setInputsVisible] = useState(true);
     // Pixel streaming library instance is stored into this state variable after initialization:
@@ -101,6 +101,7 @@ export const PixelStreamingWrapper = ({
             {inputsVisible && (
                 <div style={{
                     zIndex: 99,
+                    display: 'none',
                     position: 'absolute',
                     top: '20px',
                     left: '20px',
